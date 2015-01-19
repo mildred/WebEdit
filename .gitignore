@@ -1,0 +1,4 @@
+/ckeditor_sdk
+/ckeditor_*.zip
+/*.log
+/*.pid

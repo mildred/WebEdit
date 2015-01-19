@@ -25,11 +25,11 @@
 		var editor = CKEDITOR.replace('editable', {
                     dialog_noConfirmCancel: true,
                     fullPage: true,
-                    removePlugins: "about,templates,selectall,forms,specialchar,flash,iframe,save",
-                    extraPlugins: "openurl,allowsave",
+                    removePlugins: "about,templates,selectall,forms,specialchar,flash,iframe,save,allowsave,openurl",
+                    extraPlugins: "saveurl",
                     toolbar: [
                         { name: 'document', groups: [ 'mode', 'document', 'doctools' ],
-                          items: [ 'NewPage', 'OpenUrl', 'Save', '-', 'Preview', 'Print' ] },
+                          items: [ 'NewPage', 'OpenUrl', 'SaveUrl', '-', 'Preview', 'Print' ] },
                         { name: 'tools',
                           items: [ 'Source', 'ShowBlocks', 'DocProps' ] },
                         { name: 'clipboard', groups: [ 'clipboard' ],
@@ -61,9 +61,11 @@
 		editor.on('instanceReady', function (ev) {
                     this.execCommand('maximize');
                 });
+                /*
                 editor.on('save', function(){
                     alert('TODO save');
                 });
+                */
 	</script>
 </body>
 </html>
