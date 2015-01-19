@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>HTML Editor</title>
+	<script src="ckeditor/ckeditor.js"></script>
+</head>
+<body>
+	<div id="editable" contenteditable="true">
+	Hello There
+	
+<pre>TODO:
+- save using PUT method
+- sign blob using ed25519 using prompted key
+- generate key if there is none
+- remember key in localStorage
+- dialog to change &lt;link&gt; elements in HEAD
+- button in this dialog to propagate backlinks
+- find a way to include rev=index links as iframes in the body if a page
+- integrate this in the editor as a widget
+</pre>
+	</div>
+
+	<script>
+		var editor = CKEDITOR.replace('editable', {
+                    dialog_noConfirmCancel: true,
+                    fullPage: true,
+                    removePlugins: "about,templates,selectall,forms,specialchar,flash,iframe,save",
+                    extraPlugins: "openurl,allowsave",
+                    toolbar: [
+                        { name: 'document', groups: [ 'mode', 'document', 'doctools' ],
+                          items: [ 'NewPage', 'OpenUrl', 'Save', '-', 'Preview', 'Print' ] },
+                        { name: 'tools',
+                          items: [ 'Source', 'ShowBlocks', 'DocProps' ] },
+                        { name: 'clipboard', groups: [ 'clipboard' ],
+                          items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord'] },
+                        { name: 'clipboard', groups: [ 'undo' ],
+                          items: [ 'Undo', 'Redo' ] },
+                        { name: 'editing', groups: [ 'find', 'spellchecker' ],
+                          items: [ 'Find', 'Replace', '-', 'Scayt' ] },
+                        { name: 'forms',
+                          items: [ ] },
+                        { name: 'paragraph', groups: [ 'bidi' ],
+                          items: [ 'BidiLtr', 'BidiRtl', 'Language' ] },
+                        '/',
+                        { name: 'styles',
+                          items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+                        { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ],
+                          items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] },
+                        { name: 'colors',
+                          items: [ 'TextColor', 'BGColor' ] },
+                        { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align' ],
+                          items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
+                                   'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+                        { name: 'links',
+                          items: [ 'Link', 'Unlink', 'Anchor' ] },
+                        { name: 'insert',
+                          items: [ 'Image', 'Table', 'HorizontalRule', 'Smiley', 'PageBreak' ] },
+                    ]
+		});
+		editor.on('instanceReady', function (ev) {
+                    this.execCommand('maximize');
+                });
+                editor.on('save', function(){
+                    alert('TODO save');
+                });
+	</script>
+</body>
+</html>
