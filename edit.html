@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
+<head><meta charset="utf-8">
 	<title>HTML Editor</title>
 	<script src="ckeditor/ckeditor.js"></script>
 </head>
 <body>
-	<div id="editable" contenteditable="true">
-	Hello There
-	
-<pre>DONE:
+<div contenteditable="true" id="editable">Hello There
+<p><a href="/ckeditor_sdk/docs/">SDK Docs</a>, <a href="http://ckeditor.com/builder">CKEditor Builder</a></p>
+
+<pre>
+DONE:
 - save using PUT method
 
 TODO:
@@ -21,14 +21,14 @@ TODO:
 - find a way to include rev=index links as iframes in the body if a page
 - integrate this in the editor as a widget
 </pre>
-	</div>
-
-	<script>
+</div>
+<script>
 		var editor = CKEDITOR.replace('editable', {
+                    allowedContent: true,
                     dialog_noConfirmCancel: true,
                     fullPage: true,
                     removePlugins: "about,templates,selectall,forms,specialchar,flash,iframe,save,allowsave,openurl",
-                    extraPlugins: "saveurl",
+                    extraPlugins: "saveurl,openlink",
                     toolbar: [
                         { name: 'document', groups: [ 'mode', 'document', 'doctools' ],
                           items: [ 'NewPage', 'OpenUrl', 'SaveUrl', '-', 'Preview', 'Print' ] },
@@ -68,6 +68,5 @@ TODO:
                     alert('TODO save');
                 });
                 */
-	</script>
-</body>
+	</script></body>
 </html>
