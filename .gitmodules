@@ -1,6 +1,6 @@
 [submodule "openlink"]
 	path = openlink
 	url = https://github.com/mlewand/ckeditor-plugin-openlink.git
-[submodule "js-nacl"]
-	path = js-nacl
-	url = https://github.com/tonyg/js-nacl.git
+[submodule "ed25519"]
+	path = ed25519
+	url = https://github.com/orlp/ed25519.git

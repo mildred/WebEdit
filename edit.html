@@ -3,7 +3,7 @@
 <head><meta charset="utf-8">
 	<title>HTML Editor</title>
 	<script src="ckeditor/ckeditor.js"></script>
-	<script src="js-nacl/lib/nacl_factory.js"></script>
+	<script src="ed25519.em.js"></script>
 </head>
 <body>
 <div contenteditable="true" id="editable">Hello There
@@ -24,7 +24,7 @@ TODO:
 </pre>
 </div>
 <script>
-    var nacl = nacl_factory.instantiate();
+    //var nacl = nacl_factory.instantiate();
     //alert(nacl.to_hex(nacl.random_bytes(16)));
 
     var editor = CKEDITOR.replace('editable', {
