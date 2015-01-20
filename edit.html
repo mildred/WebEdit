@@ -3,7 +3,7 @@
 <head><meta charset="utf-8">
 	<title>HTML Editor</title>
 	<script src="ckeditor/ckeditor.js"></script>
-	<script src="ed25519.em.js"></script>
+	<script src="ed25519.em0.js"></script>
 </head>
 <body>
 <div contenteditable="true" id="editable">Hello There
@@ -26,6 +26,29 @@ TODO:
 <script>
     //var nacl = nacl_factory.instantiate();
     //alert(nacl.to_hex(nacl.random_bytes(16)));
+    //var array = new Uint32Array(1);
+    //window.crypto.getRandomValues(array);
+    
+    function toHex(s){
+        var r='', i=0, h;
+        while(i<s.length){
+            h=s.charCodeAt(i++).toString(16);
+            r+=h;
+        }
+        return r;
+    }
+    
+    /*var Ed25519 = Module;
+    var seed = Ed25519.allocate(32, 'char', Ed25519.ALLOC_STACK);
+    var pubkey = Ed25519.allocate(32, 'char', Ed25519.ALLOC_STACK);
+    var privkey = Ed25519.allocate(64, 'char', Ed25519.ALLOC_STACK);
+    _ed25519_create_seed(seed);
+    _ed25519_create_keypair(pubkey, privkey, seed);
+    */
+    var seed = Ed25519.create_seed();
+    var key  = Ed25519.create_keypair(seed);
+    console.log("pub: " + toHex(key.pub));
+    console.log("priv: " + toHex(key.priv));
 
     var editor = CKEDITOR.replace('editable', {
         allowedContent: true,
