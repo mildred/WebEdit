@@ -26,3 +26,9 @@ all: ed25519.em.js ed25519.em0.js
 
 %.bc: %.c
 	$(EMCC) -s LINKABLE=1 -c -o $@ $+
+
+root:
+	rm -rf root
+	mkdir root
+	cp -R ckeditor ed25519.em.js ed25519.em0.js ed25519.em.js.mem edit.html hello.html openlink saveurl root
+.PHONY: root

@@ -106,7 +106,18 @@
                     xhr.open('PUT', url, true);
                     xhr.onreadystatechange = function() {
                         if ( xhr.readyState == 4 ) {
-                            if(xhr.readyState == 4 && ( ( xhr.status >= 200 && xhr.status < 300 ) || xhr.status == 304 || xhr.status === 0 || xhr.status == 1223 ) ) {
+                            if( (xhr.status >= 200 && xhr.status < 300) ||
+                                xhr.status == 304 || xhr.status === 0 || xhr.status == 1223 ) {
+                                var location = xhr.getResponseHeader("Location");
+                                if(location) {
+                                    if(location[0] == '/') {
+                                        location = document.location.origin + location;
+                                    }
+                                    if(editor.documentURL != location) {
+                                        editor.documentURL = location;
+                                        alert("Document saved to a new location:\n" + location);
+                                    }
+                                }
                                 var autoSaveKey = editor.config.autosave_SaveKey != null ? editor.config.autosave_SaveKey : 'autosave_' + window.location + "_" + editor.id;
                                 localStorage.removeItem(autoSaveKey);
                             } else {
