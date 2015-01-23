@@ -27,14 +27,16 @@ all: ed25519.em.js ed25519.em0.js
 %.bc: %.c
 	$(EMCC) -s LINKABLE=1 -c -o $@ $+
 
+PLUGINS=saveurl
+
 root:
 	rm -rf $@
 	mkdir $@
-	cp -RL ckeditor ed25519.em.js ed25519.em0.js ed25519.em.js.mem edit.html hello.html openlink saveurl $@
+	cp -RL ckeditor ed25519.em.js ed25519.em0.js ed25519.em.js.mem edit.html hello.html $(PLUGINS) $@
 
 rootl:
 	rm -rf $@
 	mkdir $@
-	cp -R ckeditor ed25519.em.js ed25519.em0.js ed25519.em.js.mem edit.html hello.html openlink saveurl $@
+	cp -R ckeditor ed25519.em.js ed25519.em0.js ed25519.em.js.mem edit.html hello.html $(PLUGINS) $@
 
 .PHONY: root rootl

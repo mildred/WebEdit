@@ -4,6 +4,55 @@
     hidpi: true,
     init: function( editor ) {
 
+        var autoSaveDelay = 1000;
+        var autoSaveAlready = false;
+        var autoSaveEnabled = true;
+        var autoSaveKey = editor.config.autosave_SaveKey != null ? editor.config.autosave_SaveKey : 'autosave_' + window.location + "_" + editor.id;
+        
+        function autoSave() {
+            if(!autoSaveEnabled) return false;
+            if(!autoSaveAlready && localStorage.getItem(autoSaveKey)) {
+                console.log("Another editor auto saved before us");
+                return false;
+            }
+            try {
+                var compressedJSON = LZString.compressToUTF16(JSON.stringify({ data: editor.getSnapshot(), saveTime: new Date() }));
+                autoSaveAlready = true;
+                localStorage.setItem(autoSaveKey, compressedJSON);
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+        
+        function autoSaveReset() {
+            localStorage.removeItem(autoSaveKey);                                
+            editor.resetDirty();
+        }
+        
+        function autoSaveRestore() {
+            var data = localStorage.getItem(autoSaveKey);
+            if(!data) return
+
+            data = JSON.parse(LZString.decompressFromUTF16(data));
+            if(confirm("You have an unsaved document from " + data.saveTime + ".\nOpen it ?")) {
+                autoSaveAlready = true;
+                editor.loadSnapshot(data.data);
+                return
+            }
+            
+            if(confirm("Delete backup of auto-saved document from " + data.saveTime + "?\nIf you say no, auto-save feature will be disable for this session.")) {
+                autoSaveReset();
+            } else {
+                autoSaveEnabled = false;
+            }
+        }
+        
+        editor.on('uiSpace', function (event) {
+            if (event.data.space != 'bottom') return;
+            event.data.html += '<div class="autoSaveMessage" unselectable="on"><div unselectable="on" class="hidden" id="cke_saveurlMessage_' + editor.name + '"></div></div>';
+        }, editor, null, 100);
+
 	CKEDITOR.dialog.add( 'openUrl', function( editor ) {
             var dialogDefinition = {
                 title: 'Open URL',
@@ -117,9 +166,19 @@
                                         editor.documentURL = location;
                                         alert("Document saved to a new location:\n" + location);
                                     }
+                                } else {
+                                    location = url;
                                 }
-                                var autoSaveKey = editor.config.autosave_SaveKey != null ? editor.config.autosave_SaveKey : 'autosave_' + window.location + "_" + editor.id;
-                                localStorage.removeItem(autoSaveKey);
+                                autoSaveReset();
+                                
+                                var autoSaveMessage = document.getElementById('cke_saveurlMessage_' + editor.name);
+                                if (autoSaveMessage) {
+                                    autoSaveMessage.className = "show";
+                                    autoSaveMessage.textContent = "Saved at " + location;
+                                    /*setTimeout(function() {
+                                        autoSaveMessage.className = "hidden";
+                                    }, 2000);*/
+                                }
                             } else {
                                 alert("Could not save document:\n" + xhr.responseText);
                             }
@@ -151,6 +210,10 @@
         });
         
         editor.on('instanceReady', function (ev) {
+            CKEDITOR.scriptLoader.load(CKEDITOR.getUrl(CKEDITOR.plugins.getPath('saveurl') + 'js/extensions.min.js'), function(){
+                autoSaveRestore();
+            });
+
             editor.window.getFrame().$.contentWindow.addEventListener("keydown", function(e){
                 if(e.key == 's' && e.ctrlKey) {
                     editor.execCommand("saveUrlAs");
@@ -158,48 +221,40 @@
                 }
             });
         });
+        
+        var dirty = false;
+        editor.on('change', function (ev) {
+            if(dirty) return;
+            if(!editor.checkDirty()) return;
+            var autoSaveMessage = document.getElementById('cke_saveurlMessage_' + editor.name);
+            dirty = true;
+                  
+            if (autoSaveMessage) {
+                autoSaveMessage.className = "show";
+                autoSaveMessage.textContent = "Not Saved";
+            }
+
+            setTimeout(function(){
+                if(!autoSave()) return;
+
+                dirty = false;
+                if (autoSaveMessage) {
+                    autoSaveMessage.className = "show";
+                    autoSaveMessage.textContent = "Saved in memory";
+                }
+            }, autoSaveDelay);
+        });
+        
+        window.addEventListener("beforeunload", function (e) {
+            if(!editor.checkDirty()) {
+                console.log("Editor is clean.");
+                return;
+            }                
+            var confirmationMessage = "If you leave this page, you'll loose unsaved changes.";
+            console.log(confirmationMessage);
+            (e || window.event).returnValue = confirmationMessage;     //Gecko + IE
+            return confirmationMessage;                                //Gecko + Webkit, Safari, Chrome etc.
+        });
 
     }
 });
-/*
-( function() {
-	var saveCmd = {
-		readOnly: 1,
-
-		exec: function( editor ) {
-			if ( editor.fire( 'save' ) ) {
-				var $form = editor.element.$.form;
-
-				if ( $form ) {
-					try {
-						$form.submit();
-					} catch ( e ) {
-						// If there's a button named "submit" then the form.submit
-						// function is masked and can't be called in IE/FF, so we
-						// call the click() method of that button.
-						if ( $form.submit.click )
-							$form.submit.click();
-					}
-				}
-			}
-		}
-	};
-
-	// Register a plugin named "allowsave".
-	CKEDITOR.plugins.add( 'saveurl', {
-		lang: 'af,ar,bg,bn,bs,ca,cs,cy,da,de,el,en,en-au,en-ca,en-gb,eo,es,et,eu,fa,fi,fo,fr,fr-ca,gl,gu,he,hi,hr,hu,id,is,it,ja,ka,km,ko,ku,lt,lv,mk,mn,ms,nb,nl,no,pl,pt,pt-br,ro,ru,si,sk,sl,sq,sr,sr-latn,sv,th,tr,ug,uk,vi,zh,zh-cn', // %REMOVE_LINE_CORE%
-		icons: 'saveurl', // %REMOVE_LINE_CORE%
-		hidpi: true, // %REMOVE_LINE_CORE%
-		init: function( editor ) {
-			var command = editor.addCommand( 'save', saveCmd );
-			command.modes = { wysiwyg: 1, source: 1 };
-
-			editor.ui.addButton && editor.ui.addButton( 'Save', {
-				label: editor.lang.allowsave.toolbar,
-				command: 'save',
-				toolbar: 'document,10'
-			} );
-		}
-	} );
-} )();
-*/
