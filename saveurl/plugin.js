@@ -134,11 +134,11 @@
         
         
         editor.addCommand( 'openUrl', new CKEDITOR.dialogCommand( 'openUrl' ) );
-        editor.addCommand( 'saveUrl', new CKEDITOR.dialogCommand( 'saveUrl' ) );
+        editor.addCommand( 'saveUrlAs', new CKEDITOR.dialogCommand( 'saveUrl' ) );
 
-        editor.ui.addButton( 'SaveUrl', {
+        editor.ui.addButton( 'SaveUrlAs', {
             label: 'Save URL',
-            command: 'saveUrl',
+            command: 'saveUrlAs',
             toolbar: 'document',
             icon: 'saveurl'
         });
@@ -149,6 +149,16 @@
             toolbar: 'document',
             icon: 'openurl'
         });
+        
+        editor.on('instanceReady', function (ev) {
+            editor.window.getFrame().$.contentWindow.addEventListener("keydown", function(e){
+                if(e.key == 's' && e.ctrlKey) {
+                    editor.execCommand("saveUrlAs");
+                    e.preventDefault();
+                }
+            });
+        });
+
     }
 });
 /*

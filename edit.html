@@ -32,14 +32,6 @@ TODO:
         return confirmationMessage;                                //Gecko + Webkit, Safari, Chrome etc.
         });
 
-- save with Ctrl+S
-        &lt;SCRIPT language="javascript" event="onkeydown()" for="objContent"&gt;
-        var event = objContent.DOM.parentWindow.event; // here is the trick !
-
-        if(event.keyCode == 83 &amp;&amp; event.ctrlKey){
-        // save our state
-        }
-        &lt;/SCRIPT&gt;
 </pre>
 </div>
 <script>
@@ -80,7 +72,7 @@ TODO:
         extraPlugins: "saveurl,openlink",
         toolbar: [
             { name: 'document', groups: [ 'mode', 'document', 'doctools' ],
-                items: [ 'NewPage', 'OpenUrl', 'SaveUrl', '-', 'Preview', 'Print' ] },
+                items: [ 'NewPage', 'OpenUrl', 'SaveUrlAs', '-', 'Preview', 'Print' ] },
             { name: 'tools',
                 items: [ 'Source', 'ShowBlocks', 'DocProps' ] },
             { name: 'clipboard', groups: [ 'clipboard' ],
