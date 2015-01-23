@@ -14,6 +14,7 @@ DONE:
 - save using PUT method
 
 TODO:
+- warn when closing the window if there is unsaved work
 - sign blob using ed25519 using prompted key
 - generate key if there is none
 - remember key in localStorage
@@ -21,6 +22,24 @@ TODO:
 - button in this dialog to propagate backlinks
 - find a way to include rev=index links as iframes in the body if a page
 - integrate this in the editor as a widget
+
+- warn unsaved work:
+
+        window.addEventListener("beforeunload", function (e) {
+        var confirmationMessage = "\o/";
+
+        (e || window.event).returnValue = confirmationMessage;     //Gecko + IE
+        return confirmationMessage;                                //Gecko + Webkit, Safari, Chrome etc.
+        });
+
+- save with Ctrl+S
+        &lt;SCRIPT language="javascript" event="onkeydown()" for="objContent"&gt;
+        var event = objContent.DOM.parentWindow.event; // here is the trick !
+
+        if(event.keyCode == 83 &amp;&amp; event.ctrlKey){
+        // save our state
+        }
+        &lt;/SCRIPT&gt;
 </pre>
 </div>
 <script>
@@ -51,6 +70,9 @@ TODO:
     console.log("priv: " + toHex(key.priv));
 
     var editor = CKEDITOR.replace('editable', {
+        autosave_SaveKey: "tag:mildred.fr,2015:WebEdit:AutoSave:Key",
+        autosave_delay: 5,
+        autosave_NotOlderThen: 1440 * 365 * 100, // as long as possible: 100 years
         allowedContent: true,
         dialog_noConfirmCancel: true,
         fullPage: true,
@@ -75,12 +97,14 @@ TODO:
             { name: 'styles',
                 items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
             { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ],
-                items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ] },
+                items: [ 'RemoveFormat', '-',
+                         'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript' ] },
             { name: 'colors',
                 items: [ 'TextColor', 'BGColor' ] },
             { name: 'paragraph', groups: [ 'list', 'indent', 'blocks', 'align' ],
-                items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
-                        'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
+                items: [ 'NumberedList', 'BulletedList', '-',
+                         'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
+                         'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ] },
             { name: 'links',
                 items: [ 'Link', 'Unlink', 'Anchor' ] },
             { name: 'insert',
