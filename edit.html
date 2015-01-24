@@ -23,15 +23,6 @@ TODO:
 - find a way to include rev=index links as iframes in the body if a page
 - integrate this in the editor as a widget
 
-- warn unsaved work:
-
-        window.addEventListener("beforeunload", function (e) {
-        var confirmationMessage = "\o/";
-
-        (e || window.event).returnValue = confirmationMessage;     //Gecko + IE
-        return confirmationMessage;                                //Gecko + Webkit, Safari, Chrome etc.
-        });
-
 </pre>
 </div>
 <script>
