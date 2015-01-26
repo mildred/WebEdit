@@ -18,6 +18,44 @@
             (e || window.event).returnValue = confirmationMessage;     //Gecko + IE
             return confirmationMessage;                                //Gecko + Webkit, Safari, Chrome etc.
         });
+        
+        /****************************
+        ** Protocol Buffer NameSys **
+        ****************************/
+        
+        function ipnsEntry(o) {
+            // https://developers.google.com/protocol-buffers/docs/encoding
+            var pb = new Pbf();
+            pb.writeBytesField(1, o.value);
+            pb.writeBytesField(2, o.signature);
+            return pb.finish();
+        }
+        
+        /************
+        ** Ed25519 **
+        ************/
+        
+        function signIpnsHash(value, key){
+            return ipnsEntry({
+                value: value,
+                signature: Ed25519.sign(value, key.pub, key.priv)
+            });
+        }
+        
+        function generateKey() {
+            return Ed25519.create_keypair(Ed25519.create_seed());
+        }
+        
+        function encodeKey(key) {
+            return btoa(key.pub) + btoa(key.priv);
+        }
+        
+        function decodeKey(key) {
+            return {
+                pub:  atob(key.substr(0, 44)),
+                priv: atob(key.substr(44)),
+            };
+        }
 
         /**************
         ** Auto Save **
@@ -121,6 +159,31 @@
         ** HTTP Request **
         *****************/
         
+        function httpPostName(url, hash, key, cb) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('Post', url, true);
+            xhr.onreadystatechange = httpCallback;
+            xhr.setRequestHeader('IPNS', 'Update');
+            xhr.setRequestHeader('IPNS-PublicKey', btoa(key.pub));
+            xhr.setRequestHeader('IPNS-PublicKey-Type', 'Ed25519');
+            xhr.send(signIpnsHash(hash, key));
+            
+            function httpCallback() {
+                if ( xhr.readyState != 4 ) return;
+                var ok = (xhr.status >= 200 && xhr.status < 300) ||
+                    xhr.status == 304 || xhr.status === 0 || xhr.status == 1223;
+                
+                var location = xhr.getResponseHeader("Location");
+                if(!location) {
+                    location = url;
+                } else if(location[0] == '/') {
+                    location = url.replace(/^(.*[^\/])?\/[^\/].*$/, "$1" + location);
+                }
+                
+                cb(ok, location, xhr);
+            }
+        }
+        
         // opts.url
         // opts.content_type
         // opts.data
@@ -145,13 +208,20 @@
                     location = url.replace(/^(.*[^\/])?\/[^\/].*$/, "$1" + location);
                 }
                 
-                cb(ok, location, xhr);
+                var ipfshash = xhr.getResponseHeader("IPFS-Hash");
+                
+                if(ok && opts.key) {
+                    httpPostName(location, ipfshash, key, cb);
+                } else {
+                    cb(ok, location, xhr);
+                }
             }
         }
 
-        function httpPutEditor(url, cb) {
+        function httpPutEditor(url, key, cb) {
             httpPutFile({
                 url:          url,
+                key:          key,
                 data:         editor.getData(),
                 content_type: 'text/html; charset=UTF-8'
             }, function(ok, location, xhr){
@@ -243,6 +313,22 @@
                                 id: 'urlId'
                             },
                             {
+                                type:      'text',
+                                id:        'key',
+                                label:     'Private Key',
+                                'default': ''
+                            },
+                            {
+                                type:      'button',
+                                id:        'keyGenerate',
+                                label:     'Generate',
+                                onClick: function(){
+                                    var dlg = this.getDialog();
+                                    dlg.getContentElement('box', 'key')
+                                        .setValue(encodeKey(generateKey()), true);
+                                }
+                            },
+                            {
                                 type: 'html',
                                 id:   'html',
                                 html: ''
@@ -264,6 +350,7 @@
                     // "this" is now a CKEDITOR.dialog object.
                     // Accessing dialog elements:
                     var url = this.getContentElement('box', 'urlId').getValue();
+                    var key = decodeKey(this.getContentElement('box', 'key').getValue());
                     var dlg = this;
                     this.getContentElement('box', 'urlId').disable();
                     document.getElementById(this.getContentElement('box', 'html').domId).innerHTML = "Saving...";
@@ -274,7 +361,7 @@
                     }
                     
                     ev.data.hide = false;
-                    httpPutEditor(url, function(){
+                    httpPutEditor(url, key, function(){
                         dlg.hide();
                     });
                 }

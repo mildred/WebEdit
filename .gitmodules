@@ -4,3 +4,9 @@
 [submodule "ed25519"]
 	path = ed25519
 	url = https://github.com/orlp/ed25519.git
+[submodule "pbf"]
+	path = pbf
+	url = https://github.com/mapbox/pbf.git
+[submodule "lz-string"]
+	path = lz-string
+	url = https://github.com/pieroxy/lz-string.git
